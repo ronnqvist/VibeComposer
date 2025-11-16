@@ -33,7 +33,8 @@ export const action: ActionFunction = async ({ request }) => {
 
 		const normalizedPromoCode = promoCode.trim().toLowerCase();
 
-		const promoConfig = VALID_PROMO_CODES[normalizedPromoCode as keyof typeof VALID_PROMO_CODES];
+		const promoConfig =
+			VALID_PROMO_CODES[normalizedPromoCode as keyof typeof VALID_PROMO_CODES];
 
 		if (!promoConfig) {
 			trackEvent("promo_code_invalid", {
@@ -60,7 +61,10 @@ export const action: ActionFunction = async ({ request }) => {
 				updatedAt: now,
 			});
 		} else {
-			if (user.hasUnlimitedMessages && user.promoCodeApplied === normalizedPromoCode) {
+			if (
+				user.hasUnlimitedMessages &&
+				user.promoCodeApplied === normalizedPromoCode
+			) {
 				trackEvent("promo_code_already_applied", {
 					userId,
 					promoCode: normalizedPromoCode,
@@ -105,12 +109,9 @@ export const action: ActionFunction = async ({ request }) => {
 		return json(
 			{
 				error:
-					error instanceof Error
-						? error.message
-						: "Failed to apply promo code",
+					error instanceof Error ? error.message : "Failed to apply promo code",
 			},
 			{ status: 500 }
 		);
 	}
 };
-
