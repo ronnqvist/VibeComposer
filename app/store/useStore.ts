@@ -43,6 +43,8 @@ interface AppState {
 	totalMessages: number;
 	messageLimit: number;
 	userId: string | null;
+	hasUnlimitedMessages: boolean;
+	setHasUnlimitedMessages: (hasUnlimited: boolean) => void;
 	createChat: (name?: string) => Promise<void>;
 	deleteChat: (chatId: string) => Promise<void>;
 	renameChat: (chatId: string, newName: string) => Promise<void>;
@@ -132,6 +134,7 @@ export const useStore = create<AppState>((set, get) => ({
 	messageLimitExceededModalOpen: false,
 	showAuthPrompt: false,
 	userId: null,
+	hasUnlimitedMessages: false,
 	isRecording: false,
 	recordingDuration: 0,
 	currentRecording: null,
@@ -305,8 +308,14 @@ export const useStore = create<AppState>((set, get) => ({
 		return {
 			totalMessages: state.totalMessages,
 			messageLimit: state.messageLimit,
-			remainingMessages: Math.max(0, state.messageLimit - state.totalMessages),
+			remainingMessages: state.hasUnlimitedMessages 
+				? Infinity 
+				: Math.max(0, state.messageLimit - state.totalMessages),
 		};
+	},
+
+	setHasUnlimitedMessages: (hasUnlimited: boolean) => {
+		set({ hasUnlimitedMessages: hasUnlimited });
 	},
 
 	updateStrudelCode: (code: string) => {
@@ -360,13 +369,14 @@ export const useStore = create<AppState>((set, get) => ({
 			);
 			if (!response.ok) throw new Error("Failed to load chats");
 
-			const { chats, totalMessages } = await response.json();
+			const { chats, totalMessages, hasUnlimitedMessages } = await response.json();
 			const latestChat = chats.length > 0 ? chats[0] : null;
 
 			set({
 				chats,
 				activeChatId: latestChat?._id || null,
 				totalMessages,
+				hasUnlimitedMessages: hasUnlimitedMessages || false,
 			});
 		} catch (error) {
 			console.error("Error loading chats:", error);

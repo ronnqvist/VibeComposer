@@ -5,6 +5,7 @@ const routes: RouteConfig = [
   index("./routes/_index.tsx"),
   route("api/chats", "./routes/api.chats.tsx"),
   route("api/chat/message", "./routes/api.chat.message.tsx"),
+  route("api/promo-code", "./routes/api.promo-code.tsx"),
 ];
 
 export default routes;

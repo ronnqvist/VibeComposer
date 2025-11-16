@@ -17,7 +17,7 @@ export function MobileLayout({ activeTab, onTabChange }: MobileLayoutProps) {
 	const [showTroubleHearingModal, setShowTroubleHearingModal] = useState(false);
 	const [showExamplesModal, setShowExamplesModal] = useState(false);
 	const [showChatsModal, setShowChatsModal] = useState(false);
-	const { createChat, getMessageStats } = useStore();
+	const { createChat, getMessageStats, hasUnlimitedMessages } = useStore();
 	const { totalMessages, messageLimit } = getMessageStats();
 
 	async function handleNewChat() {
@@ -62,7 +62,11 @@ export function MobileLayout({ activeTab, onTabChange }: MobileLayoutProps) {
 					<div className="border-b border-white/20 px-4 py-2 flex items-center justify-between flex-shrink-0 h-10">
 						<span className="text-sm text-white/70">AI CHAT</span>
 						<div className="text-xs text-white/60">
-							Messages: {totalMessages}/{messageLimit}
+							{hasUnlimitedMessages ? (
+								<span className="text-green-400 font-medium">Messages: Unlimited ∞</span>
+							) : (
+								<>Messages: {totalMessages}/{messageLimit}</>
+							)}
 						</div>
 					</div>
 					<div className="flex-1 min-h-0 overflow-hidden">

@@ -20,12 +20,15 @@ type Pages = {
   "/api/chat/message": {
     params: {};
   };
+  "/api/promo-code": {
+    params: {};
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/api/chats" | "/api/chat/message";
+    page: "/" | "/api/chats" | "/api/chat/message" | "/api/promo-code";
   };
   "./routes/_index.tsx": {
     id: "routes/_index";
@@ -39,6 +42,10 @@ type RouteFiles = {
     id: "routes/api.chat.message";
     page: "/api/chat/message";
   };
+  "./routes/api.promo-code.tsx": {
+    id: "routes/api.promo-code";
+    page: "/api/promo-code";
+  };
 };
 
 type RouteModules = {
@@ -46,4 +53,5 @@ type RouteModules = {
   "routes/_index": typeof import("./app/./routes/_index.tsx");
   "routes/api.chats": typeof import("./app/./routes/api.chats.tsx");
   "routes/api.chat.message": typeof import("./app/./routes/api.chat.message.tsx");
+  "routes/api.promo-code": typeof import("./app/./routes/api.promo-code.tsx");
 };

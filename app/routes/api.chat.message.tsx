@@ -2,7 +2,7 @@ import type { ActionFunction } from "react-router";
 import { json } from "~/server/json";
 import Anthropic from "@anthropic-ai/sdk";
 import { connectDB } from "~/db/connect";
-import { Chat } from "~/db/models";
+import { Chat, User } from "~/db/models";
 import { STRUDEL_SYSTEM_PROMPT } from "~/prompts/strudel-system-prompt";
 import { MESSAGE_LIMIT } from "~/constants/limits";
 
@@ -37,20 +37,24 @@ export const action: ActionFunction = async ({ request }) => {
 			return json({ error: "Chat not found" }, { status: 404 });
 		}
 
-		// Count total messages across all user's chats
-		const allChats = await Chat.find({ userId });
-		const totalMessages = allChats.reduce(
-			(sum, c) => sum + c.messages.filter((m) => m.role === "user").length,
-			0
-		);
+		const user = await User.findOne({ userId });
+		const hasUnlimitedMessages = user?.hasUnlimitedMessages || false;
 
-		if (totalMessages >= MESSAGE_LIMIT) {
-			return json(
-				{
-					error: `Message limit of ${MESSAGE_LIMIT} reached across all chats. Please clear chats to continue.`,
-				},
-				{ status: 400 }
+		if (!hasUnlimitedMessages) {
+			const allChats = await Chat.find({ userId });
+			const totalMessages = allChats.reduce(
+				(sum, c) => sum + c.messages.filter((m) => m.role === "user").length,
+				0
 			);
+
+			if (totalMessages >= MESSAGE_LIMIT) {
+				return json(
+					{
+						error: `Message limit of ${MESSAGE_LIMIT} reached across all chats. Please clear chats to continue.`,
+					},
+					{ status: 400 }
+				);
+			}
 		}
 
 		const userMessage = {

@@ -16,6 +16,15 @@ interface IChat extends Document {
   updatedAt: number;
 }
 
+interface IUser extends Document {
+  userId: string;
+  hasUnlimitedMessages: boolean;
+  promoCodeApplied?: string;
+  promoCodeAppliedAt?: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
 const messageSchema = new Schema<IMessage>({
   role: { type: String, enum: ["user", "assistant"], required: true },
   content: { type: String, required: true },
@@ -34,7 +43,17 @@ const chatSchema = new Schema<IChat>({
 
 chatSchema.index({ userId: 1, updatedAt: -1 });
 
+const userSchema = new Schema<IUser>({
+  userId: { type: String, required: true, unique: true, index: true },
+  hasUnlimitedMessages: { type: Boolean, default: false },
+  promoCodeApplied: { type: String },
+  promoCodeAppliedAt: { type: Number },
+  createdAt: { type: Number, required: true },
+  updatedAt: { type: Number, required: true },
+});
+
 export const Chat = mongoose.model<IChat>("Chat", chatSchema);
 export const Message = mongoose.models.Message || mongoose.model<IMessage>("Message", messageSchema);
+export const User = mongoose.models.User || mongoose.model<IUser>("User", userSchema);
 
-export type { IChat, IMessage };
+export type { IChat, IMessage, IUser };

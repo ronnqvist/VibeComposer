@@ -1,7 +1,7 @@
 import type { LoaderFunction, ActionFunction } from "react-router";
 import { json } from "~/server/json";
 import { connectDB } from "~/db/connect";
-import { Chat } from "~/db/models";
+import { Chat, User } from "~/db/models";
 import type { IChat } from "~/db/models";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -31,17 +31,20 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
 		const totalChats = await Chat.countDocuments({ userId });
 
-		// Count total messages across all user's chats
 		const allUserChats = await Chat.find({ userId }).lean();
 		const totalMessages = allUserChats.reduce(
 			(sum, c) => sum + c.messages.filter((m) => m.role === "user").length,
 			0
 		);
 
+		const user = await User.findOne({ userId }).lean();
+		const hasUnlimitedMessages = user?.hasUnlimitedMessages || false;
+
 		return json({
 			chats: chats as any as IChat[],
 			totalChats,
 			totalMessages,
+			hasUnlimitedMessages,
 			currentPage: page,
 			pageSize,
 			totalPages: Math.ceil(totalChats / pageSize),
