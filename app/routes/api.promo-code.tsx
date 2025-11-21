@@ -9,12 +9,30 @@ interface ApplyPromoCodeRequest {
 	promoCode: string;
 }
 
-const VALID_PROMO_CODES = {
-	keeponvibing: {
-		unlimitedMessages: true,
-		description: "Keep on vibing with unlimited messages!",
-	},
-};
+interface PromoCodeConfig {
+	unlimitedMessages: boolean;
+	description: string;
+}
+
+function getValidPromoCodes(): Record<string, PromoCodeConfig> {
+	const promoCode = process.env.PROMO_CODE;
+
+	if (!promoCode) {
+		console.warn(
+			"PROMO_CODE environment variable is not set. No promo codes will be available."
+		);
+		return {};
+	}
+
+	return {
+		[promoCode.toLowerCase()]: {
+			unlimitedMessages: true,
+			description:
+				process.env.PROMO_CODE_DESCRIPTION ||
+				"Keep on vibing with unlimited messages!",
+		},
+	};
+}
 
 export const action: ActionFunction = async ({ request }) => {
 	if (request.method !== "POST") {
@@ -33,8 +51,8 @@ export const action: ActionFunction = async ({ request }) => {
 
 		const normalizedPromoCode = promoCode.trim().toLowerCase();
 
-		const promoConfig =
-			VALID_PROMO_CODES[normalizedPromoCode as keyof typeof VALID_PROMO_CODES];
+		const validPromoCodes = getValidPromoCodes();
+		const promoConfig = validPromoCodes[normalizedPromoCode];
 
 		if (!promoConfig) {
 			trackEvent("promo_code_invalid", {
