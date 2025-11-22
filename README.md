@@ -36,11 +36,21 @@ This project was built using [**pre.dev**](https://pre.dev), an AI Solutions Arc
 
 ### Environment Variables
 
-Create a `.env.local` file in the project root with the following variables:
+Create a `.env.local` file in the project root. A starter `.env.example` is provided. Key values:
 
 ```env
-# Clerk (REQUIRED) - Used for user authentication and session management
+# Clerk (REQUIRED)
 CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_key_here
+
+# Database
+MONGO_URL=mongodb://localhost:27017/vibecomposer
+
+# AI providers
+ANTHROPIC_KEY=sk-ant-...
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_SITE_URL=http://localhost:5173
+OPENROUTER_APP_TITLE=VibeComposer (Dev)
+OPENROUTER_DEFAULT_MODEL=openrouter/auto
 ```
 
 **How to get these keys:**
@@ -50,7 +60,13 @@ CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_key_here
    - Create a new application
    - Navigate to the **API Keys** section in your dashboard
    - Copy your **Publishable Key** (starts with `pk_`)
-   - Set as either `CLERK_PUBLISHABLE_KEY`
+   - Set as `CLERK_PUBLISHABLE_KEY`
+2. **OpenRouter API Key (optional fallback)**
+   - Create an account at [openrouter.ai](https://openrouter.ai/)
+   - Generate an API key and set it as `OPENROUTER_API_KEY`
+3. **Site metadata** (used for OpenRouter attribution)
+   - `OPENROUTER_SITE_URL` should match your deployment origin
+   - `OPENROUTER_APP_TITLE` is shown in OpenRouter analytics
 
 ### Installation
 
@@ -96,9 +112,17 @@ npm run preview
 
 ## 🔒 Security
 
-- Your API key is stored **only in your browser's localStorage** and is never sent anywhere except directly to Anthropic's API
+- Server-managed OpenRouter keys live in HTTP-only cookies or environment variables—never in client storage.
+- Anthropic API keys (when used) should be provided server-side via `ANTHROPIC_KEY`.
 - User authentication is handled securely by **Clerk**
-- No server storage, no tracking—just you and your music
+- No server storage of user-supplied OpenRouter keys beyond the session cookie.
+
+## 🔐 OpenRouter BYOK & Privacy
+
+- A backend proxy at `/api/openrouter` forwards all OpenRouter traffic with attribution headers and `usage` reporting.
+- You can provide your own OpenRouter API key via `/api/user-key`; it is stored server-side in an HTTP-only cookie (`vc_or_user_key`).
+- If no user key is set, the server falls back to `OPENROUTER_API_KEY`.
+- Keys are never exposed to the browser or persisted in client storage.
 
 ## 🙏 Acknowledgments
 
